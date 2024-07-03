@@ -1,11 +1,20 @@
 import {Component} from 'react'
+
+import GradientDirectionItem from '../GradientDirectionItem'
+
 import {
-  BgContainer,
-  Input,
-  ColorInput,
+  GradientGeneratorContainer,
+  ResponsiveContainer,
+  Heading,
+  DirectionsDescription,
+  GradientDirectionList,
+  ColorsPickersDescription,
+  ColorPickerContainer,
+  CustomInputAndColorContainer,
+  ColorValue,
+  CustomInput,
   GenerateButton,
 } from './styledComponents'
-import GradientDirectionItem from '../GradientDirectionItem'
 
 const gradientDirectionsList = [
   {directionId: 'TOP', value: 'top', displayText: 'Top'},
@@ -16,85 +25,79 @@ const gradientDirectionsList = [
 
 class GradientGenerator extends Component {
   state = {
-    isTabActive: gradientDirectionsList[0].directionId,
-    gradientDirection: gradientDirectionsList[0].value,
-    color1: '#8ae323',
-    color2: '#014f7b',
-    generated: false,
-  }
-
-  clickTabItem = directionId => {
-    const selectedDirection = gradientDirectionsList.find(
-      eachItem => eachItem.directionId === directionId,
-    )
-    this.setState({
-      isTabActive: directionId,
-      gradientDirection: selectedDirection.value,
-    })
+    activeGradientDirection: gradientDirectionsList[0].value,
+    fromColorInput: '#8ae323',
+    toColorInput: '#014f7b',
+    gradientValue: `to ${gradientDirectionsList[0].value}, #8ae323, #014f7b`,
   }
 
   onGenerate = () => {
-    this.setState({generated: true})
+    const {fromColorInput, toColorInput, activeGradientDirection} = this.state
+    this.setState({
+      gradientValue: `to ${activeGradientDirection}, ${fromColorInput}, ${toColorInput}`,
+    })
   }
 
-  onChangeOfColor1 = event => {
-    this.setState({color1: event.target.value, generated: false})
+  onChangeToColor = event => {
+    this.setState({toColorInput: event.target.value})
   }
 
-  onChangeOfColor2 = event => {
-    this.setState({color2: event.target.value, generated: false})
+  onChangeFromColor = event => {
+    this.setState({fromColorInput: event.target.value})
+  }
+
+  clickGradientDirectionItem = direction => {
+    this.setState({activeGradientDirection: direction})
   }
 
   render() {
     const {
-      isTabActive,
-      gradientDirection,
-      color1,
-      color2,
-      generated,
+      activeGradientDirection,
+      fromColorInput,
+      toColorInput,
+      gradientValue,
     } = this.state
 
     return (
-      <BgContainer
+      <GradientGeneratorContainer
         data-testid="gradientGenerator"
-        direction={gradientDirection}
-        color1={color1}
-        color2={color2}
-        generated={generated}
+        gradientValue={gradientValue}
       >
-        <h1>Generate a CSS Color Gradient</h1>
-        <p>Choose Direction</p>
-        <ul>
-          {gradientDirectionsList.map(eachItem => (
-            <GradientDirectionItem
-              key={eachItem.directionId}
-              eachItem={eachItem}
-              isTabActive={isTabActive === eachItem.directionId}
-              onClick={this.clickTabItem}
-            />
-          ))}
-        </ul>
-        <p>Pick the Colors</p>
-        <ColorInput>
-          <div>
-            <p>{color1}</p>
-            <Input
-              type="color"
-              value={color1}
-              onChange={this.onChangeOfColor1}
-            />
-          </div>
-          <div>
-            <p>{color2}</p>
-            <Input
-              type="color"
-              value={color2}
-              onChange={this.onChangeOfColor2}
-            />
-          </div>
-        </ColorInput>
-        <GenerateButton onClick={this.onGenerate}>Generate</GenerateButton>
-      </BgContainer>
+        <ResponsiveContainer>
+          <Heading>Generate a CSS Color Gradient</Heading>
+          <DirectionsDescription>Choose Direction</DirectionsDescription>
+          <GradientDirectionList>
+            {gradientDirectionsList.map(eachDirection => (
+              <GradientDirectionItem
+                key={eachDirection.directionId}
+                gradientDirectionDetails={eachDirection}
+                clickGradientDirectionItem={this.clickGradientDirectionItem}
+                isActive={activeGradientDirection === eachDirection.value}
+              />
+            ))}
+          </GradientDirectionList>
+          <ColorsPickersDescription>Pick the Colors</ColorsPickersDescription>
+          <ColorPickerContainer>
+            <CustomInputAndColorContainer>
+              <ColorValue>{fromColorInput}</ColorValue>
+              <CustomInput
+                onChange={this.onChangeFromColor}
+                value={fromColorInput}
+                type="color"
+              />
+            </CustomInputAndColorContainer>
+            <CustomInputAndColorContainer>
+              <ColorValue>{toColorInput}</ColorValue>
+              <CustomInput
+                onChange={this.onChangeToColor}
+                value={toColorInput}
+                type="color"
+              />
+            </CustomInputAndColorContainer>
+          </ColorPickerContainer>
+          <GenerateButton onClick={this.onGenerate}>Generate</GenerateButton>
+        </ResponsiveContainer>
+      </GradientGeneratorContainer>
     )
   }
 }
